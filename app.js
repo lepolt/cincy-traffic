@@ -60,26 +60,6 @@ app.use(function(err, req, res, next) {
 var http = require('http');
 var request = require('request');
 
-//The url we want is: 'www.random.org/integers/?num=1&min=1&max=10&col=1&base=10&format=plain&rnd=new'
-//var options = {
-//    //host: '',
-//    //host: 'www.random.org',
-//    url: 'http://www.buckeyetraffic.org/services/RoadActivity.aspx',
-//    //url: 'http://www.ohgo.com/Dashboard.aspx/getTrafficSpeedAndAlertMarkers',
-//    //method: 'POST',
-//    //contentType: 'application/json; charset=utf-8',
-//    //data: '{pointRequestData:{lowLongitude:-87.98041992187498,highLongitude:-80.61958007812498,lowLatitude:37.331007680189614,highLatitude:42.95254114031307,zoomLevel:7,trueArea:,routeDirection:,routeName:,regionList:,citySide:},id:}',
-//    success: function (data) {
-//      debugger;
-//    }
-//    //path: '/integers/?num=1&min=1&max=10&col=1&base=10&format=plain&rnd=new'
-//};
-//var options = {
-//    host: 'ohgo.com',
-//    path: '/Dashboard.aspx/getTrafficSpeedAndAlertMarkers',
-//    data: '{pointRequestData:{lowLongitude:-87.98041992187498,highLongitude:-80.61958007812498,lowLatitude:37.331007680189614,highLatitude:42.95254114031307,zoomLevel:7,trueArea:,routeDirection:,routeName:,regionList:,citySide:},id:}',
-//};
-
 var data = {
     pointRequestData: {
         lowLongitude: -87.98041992187498,
@@ -96,51 +76,62 @@ var data = {
     id: ''
 };
 
-//var j = request.jar();
-//var cookie = request.cookie('ASP.NET_SessionId=3weq3rqitiju5dw34tj24btb;mapState=bordered;ohgo=cincinnati;');
-//var url = 'http://www.ohgo.com/Dashboard.aspx/getTrafficSpeedAndAlertMarkers';
-//j.setCookie(cookie, url);
-require('request').debug = true;
-request.post({
-    url: 'http://www.ohgo.com/Dashboard.aspx/getTrafficSpeedAndAlertMarkers',
-    //url: 'http://www.ohgo.com/Dashboard.aspx/getTravelTimeSigns',
-        //jar: j,
-    body: data,
-    json: true,
-    headers: {
-        'Content-Type': 'application/json; charset=UTF-8'
-    }
-    //cookie: 'mapState=bordered; ohgo=cincinnati;'
-},
-    function (err, httpResponse, body) {
-        if (!err) {
-            try {
-                // This will get the signs (I think)
-                //for (var i = 0; i < body.d.length; i++) {
-                //    var thisOne = body.d[i];
-                //    console.log(i + ' ' + thisOne['Description'] + '   x: ' + thisOne['Times'][0]['Description']);
-                //}
+var crossRoads = [],
+    exitNames = [],
+    routeNames = [];
 
-                // This will get some info
-                for (var i = 0; i < body.d['TrafficSpeedAlerts'].length; i++) {
-                    var thisOne = body.d['TrafficSpeedAlerts'][i];
-                    console.log(i + ' ' + thisOne['CrossroadName'] + '  ExitName: ' + thisOne['ExitName'] + '   spd: ' + thisOne['AverageSpeed']);
+setInterval(function () {
+    request.post({
+            url: 'http://www.ohgo.com/Dashboard.aspx/getTrafficSpeedAndAlertMarkers',
+            //url: 'http://www.ohgo.com/Dashboard.aspx/getTravelTimeSigns',
+            body: data,
+            json: true,
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8'
+            }
+            //cookie: 'mapState=bordered; ohgo=cincinnati;'
+        },
+        function (err, httpResponse, body) {
+            if (!err) {
+                try {
+
+                    // This will get the signs (I think)
+                    //for (var i = 0; i < body.d.length; i++) {
+                    //    var thisOne = body.d[i];
+                    //    console.log(i + ' ' + thisOne['Description'] + '   x: ' + thisOne['Times'][0]['Description']);
+                    //}
+
+                    // This will get some info
+                    for (var i = 0; i < body.d['TrafficSpeedAlerts'].length; i++) {
+                        var thisOne = body.d['TrafficSpeedAlerts'][i];
+                        var crossRoad = thisOne['CrossroadName'];
+                        var exitName = thisOne['ExitName'];
+                        var routeName = thisOne['RouteName'];
+
+                        if (crossRoads.indexOf(crossRoad) === -1) {
+                            crossRoads.push(crossRoad);
+                        }
+
+                        if (exitNames.indexOf(exitName) === -1) {
+                            exitNames.push(exitName);
+                        }
+
+                        if (routeNames.indexOf(routeName) === -1) {
+                            routeNames.push(routeName);
+                        }
+                        //console.log(i + ' ' + thisOne['CrossroadName'] + '  ExitName: ' + thisOne['ExitName'] + '   spd: ' + thisOne['AverageSpeed']);
+                    }
+
+                    console.log('CrossRoads: ' + crossRoads.length + '   Exits: ' + exitNames.length + '   Routes: ' + routeNames.length);
+                    debugger;
+                } catch (e) {
+
                 }
-                //console.log(body.d['TrafficSpeedAlerts'][17]);
-                //console.log(body.d['TrafficSpeedAlerts'][18]);
-                //console.log(body.d['TrafficSpeedAlerts'][19]);
-                //17, 18, 19
-                var cookie1 = httpResponse.headers['set-cookie'][0],
-                    cookie2 = httpResponse.headers['set-cookie'][1];
-                console.log(cookie1);
-                console.log(cookie2);
-//debugger;
-//console.log(body);
-            } catch (e) {
-
             }
         }
-    });
+    );
+
+}, 10000);
 
 
 module.exports = app;
