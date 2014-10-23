@@ -57,10 +57,11 @@ app.use(function (err, req, res, next) {
 });
 
 /**********************************************************************************************************************/
-var request = require('request');
-var sqlite3 = require('sqlite3');
+var sqlite3 = require('sqlite3'),
+    data,
+    db;
 
-var data = {
+data = {
   pointRequestData: {
     lowLongitude: -84.73910980224608,
     highLongitude: -84.05589752197264,
@@ -76,13 +77,9 @@ var data = {
   id: ''
 };
 
-//var crossRoads = [],
-//    exitNames = [],
-//    routeNames = [];
-
-var db = new sqlite3.Database('traffic.db3', function (err) {
-  setInterval(function () {
-    request.post({
+function getTrafficData () {
+  var request = require('request');
+  request.post({
         url: 'http://www.ohgo.com/Dashboard.aspx/getTrafficSpeedAndAlertMarkers',
         //url: 'http://www.ohgo.com/Dashboard.aspx/getTravelTimeSigns',
         body: data,
@@ -119,24 +116,24 @@ var db = new sqlite3.Database('traffic.db3', function (err) {
                 thisOne;
 
             query = 'INSERT INTO traffic (crossroadName, description, direction, directionText, exitName, id, latitude, ' +
-                                         'longitude, roadStatus, routeName, averageSpeed, date) VALUES ';
+            'longitude, roadStatus, routeName, averageSpeed, date) VALUES ';
 
             for (var i = 0; i < alerts.length; i++) {
               thisOne = alerts[i];
 
-              query += '(?,?,?,?,?,?,?,?,?,?,?,?)';
+              query += '(?,?,?,?,?,?,?,?,?,?,?,?)'; // The Riddler
 
-              queryParams.push(thisOne['CrossroadName']);//: "Exit 29, SR-63: Monroe, Lebanon"
-              queryParams.push(thisOne['Description']);//: "Milepost 27.20"
-              queryParams.push(thisOne['Direction']);//: "S"
-              queryParams.push(thisOne['DirectionText']);//: "Southbound"
-              queryParams.push(thisOne['ExitName']);//: "Exit 29, SR-63: Monroe, Lebanon"
-              queryParams.push(thisOne['ID']);//: "11852"
-              queryParams.push(thisOne['Latitude']);//: 39.41774
-              queryParams.push(thisOne['Longitude']);//: -84.34897
-              queryParams.push(thisOne['RoadStatus']);//: "Caution"
-              queryParams.push(thisOne['RouteName']);//: "I-75"
-              queryParams.push(thisOne['AverageSpeed']);//: 47']);
+              queryParams.push(thisOne['CrossroadName']);
+              queryParams.push(thisOne['Description']);
+              queryParams.push(thisOne['Direction']);
+              queryParams.push(thisOne['DirectionText']);
+              queryParams.push(thisOne['ExitName']);
+              queryParams.push(thisOne['ID']);
+              queryParams.push(thisOne['Latitude']);
+              queryParams.push(thisOne['Longitude']);
+              queryParams.push(thisOne['RoadStatus']);
+              queryParams.push(thisOne['RouteName']);
+              queryParams.push(thisOne['AverageSpeed']);
               queryParams.push(date);
 
               if (i + 1 < alerts.length) {
@@ -157,11 +154,20 @@ var db = new sqlite3.Database('traffic.db3', function (err) {
           }
         }
       }
-    );
+  );
+}
 
-  }, 60000);
+db = new sqlite3.Database('traffic.db3', function (err) {
+  var schedule = require('node-schedule');
+  var rule = new schedule.RecurrenceRule();
+
+  rule.dayOfWeek = [new schedule.Range(1, 5)];
+  rule.hour = [new schedule.Range(5, 19)];
+
+  var j = schedule.scheduleJob(rule, function(){
+    getTrafficData();
+  });
+
 });
-
-
 
 module.exports = app;
