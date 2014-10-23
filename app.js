@@ -147,6 +147,8 @@ var db = new sqlite3.Database('traffic.db3', function (err) {
             db.run(query, queryParams, function (err) {
               if (err) {
                 console.log('Query Error: ' + err.toString());
+              } else {
+                console.log(date + '   ' + alerts.length + ' records added');
               }
             });
 
