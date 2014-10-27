@@ -57,9 +57,10 @@ app.use(function (err, req, res, next) {
 });
 
 /**********************************************************************************************************************/
-var sqlite3 = require('sqlite3'),
-    data,
-    db;
+var db = require('./db/db'),
+    schedule = require('node-schedule'),
+    rule = new schedule.RecurrenceRule(),
+    data;
 
 data = {
   pointRequestData: {
@@ -90,10 +91,7 @@ function getTrafficData () {
         //cookie: 'mapState=bordered; ohgo=cincinnati;'
       },
       function (err, httpResponse, body) {
-        var newCrossRoads = [],
-            newExitNames = [],
-            newRouteNames = [],
-            alerts;
+        var alerts;
 
         if (!err) {
           try {
@@ -110,45 +108,11 @@ function getTrafficData () {
 
             // This will get some info
             //for (var i = 0; i < body.d['TrafficSpeedAlerts'].length; i++) {
-            var date = new Date().toISOString(),
-                queryParams = [],
-                query,
-                thisOne;
-
-            query = 'INSERT INTO traffic (crossroadName, description, direction, directionText, exitName, id, latitude, ' +
-            'longitude, roadStatus, routeName, averageSpeed, date) VALUES ';
-
-            for (var i = 0; i < alerts.length; i++) {
-              thisOne = alerts[i];
-
-              query += '(?,?,?,?,?,?,?,?,?,?,?,?)'; // The Riddler
-
-              queryParams.push(thisOne['CrossroadName']);
-              queryParams.push(thisOne['Description']);
-              queryParams.push(thisOne['Direction']);
-              queryParams.push(thisOne['DirectionText']);
-              queryParams.push(thisOne['ExitName']);
-              queryParams.push(thisOne['ID']);
-              queryParams.push(thisOne['Latitude']);
-              queryParams.push(thisOne['Longitude']);
-              queryParams.push(thisOne['RoadStatus']);
-              queryParams.push(thisOne['RouteName']);
-              queryParams.push(thisOne['AverageSpeed']);
-              queryParams.push(date);
-
-              if (i + 1 < alerts.length) {
-                query += ',';
-              }
-            }
-
-            db.run(query, queryParams, function (err) {
+            db.insertTrafficData(alerts, function (err) {
               if (err) {
-                console.log('Query Error: ' + err.toString());
-              } else {
-                console.log(date + '   ' + alerts.length + ' records added');
+                // TODO JEL: Do something
               }
             });
-
           } catch (e) {
 
           }
@@ -157,17 +121,16 @@ function getTrafficData () {
   );
 }
 
-db = new sqlite3.Database('traffic.db3', function (err) {
-  var schedule = require('node-schedule');
-  var rule = new schedule.RecurrenceRule();
+// Connect to the DB
+db.connect(function (err) {
+  if (!err) {
+    rule.dayOfWeek = [new schedule.Range(1, 5)];
+    rule.hour = [new schedule.Range(5, 19)];
 
-  rule.dayOfWeek = [new schedule.Range(1, 5)];
-  rule.hour = [new schedule.Range(5, 19)];
-
-  var j = schedule.scheduleJob(rule, function(){
-    getTrafficData();
-  });
-
+    var j = schedule.scheduleJob(rule, function(){
+      getTrafficData();
+    });
+  }
 });
 
 module.exports = app;
