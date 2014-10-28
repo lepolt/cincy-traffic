@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+  <script type="text/javascript" src="/javascripts/index.js"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+</head>
+<body>
+  <% if (routes.length) { %>
+  <table>
+    <tr>
+      <th>crossroadName</th>
+      <th>roadStatus</th>
+      <th>averageSpeed</th>
+      <th>date</th>
+    </tr>
+    <% for ( var i = 0; i < routes.length; i++ ) { %>
+    <tr>
+      <td><%= routes[i].crossroadName %></td>
+      <td><%= routes[i].roadStatus %></td>
+      <td><%= routes[i].averageSpeed %></td>
+      <td><%= routes[i].date %></td>
+    </tr>
+    <% } %>
+  </table>
+  <% } %>
+</body>
+</html>

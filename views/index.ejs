@@ -3,9 +3,30 @@
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script type="text/javascript" src="/javascripts/index.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   </head>
   <body>
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
+    <% if (routes.length) { %>
+      <table>
+        <tr>
+          <th>crossroadName</th>
+          <th>description</th>
+          <th>directionText</th>
+        </tr>
+      <% for ( var i = 0; i < routes.length; i++ ) { %>
+        <tr>
+          <td><a onclick="getRouteTrend('<%= routes[i].crossroadName %>', '<%= routes[i].directionText %>')"><%= routes[i].crossroadName %></a></td>
+          <td><%= routes[i].description %></td>
+          <td><%= routes[i].directionText %></td>
+        </tr>
+      <% } %>
+      </table>
+
+    Trend:
+    <input type="text" name="minutes" id="minutes">
+    <% } %>
   </body>
 </html>

@@ -210,3 +210,29 @@ exports.insertTrafficData = function (alerts, callback) {
     }
   });
 };
+
+exports.getRouteNames = function (callback) {
+  var query = 'SELECT DISTINCT crossroadName, description, directionText FROM trafficSpeedData';
+
+  db.all(query, function (err, results) {
+    callback(results);
+  });
+
+};
+
+exports.getRouteTrend = function (crossroadName, directionText, minutes, callback) {
+  var query = 'SELECT crossroadName, roadStatus, averageSpeed, date ' +
+              'FROM trafficSpeedData ' +
+              'WHERE crossroadName=$crossroadName AND directionText=$directionText ' +
+              'ORDER BY date ASC ' +
+              'LIMIT $minutes';
+
+  db.all(query, {
+    $crossroadName: crossroadName,
+    $directionText: directionText,
+    $minutes: minutes
+  }, function (err, results) {
+    callback(err, results);
+  });
+
+};
