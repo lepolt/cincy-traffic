@@ -1,5 +1,4 @@
 .idea
-bin
 node_modules
 *.db3
 *.db3-shm
