@@ -4,17 +4,18 @@ App.Router.map(function() {
   //this.resource('routes', { path: '/routes/:id' }, function () {
   //  this.route('day', { path: '/day/:date' });
   //});
-  //this.route('index', { path: '/' });
+  this.route('routes', { path: '/' });
+  //this.resource('/', { path: '/routes' });
   this.resource('routes', { path: '/routes' });
   this.resource('route', { path: '/route/:route_id' }, function() {
     this.resource('days', { path: '/days' });
-    this.resource('day', { path: '/day/:day_id' });
+    this.resource('day', { path: '/day/:day_id' }, function () {
+      this.resource('speeds');
+    });
   });
 });
 
 App.RoutesRoute = Ember.Route.extend({
-//App.IndexRoute = Ember.Route.extend({
-
   setupController: function (controller, model) {
     controller.set('model', model);
     this._super();
@@ -30,7 +31,7 @@ App.RoutesRoute = Ember.Route.extend({
 
   actions: {
     submitClicked: function () {
-      this.transitionTo('route', this.controllerFor('routes').get('selectedRoute.id'));
+      this.transitionTo('days', this.controllerFor('routes').get('selectedRoute.id'));
     }
   }
 });
@@ -63,8 +64,24 @@ App.DaysRoute = Ember.Route.extend({
 
 App.DayRoute = Ember.Route.extend({
   model: function(params) {
+    return Ember.Object.create({
+      date: params.day_id
+    });
+  }
+});
+
+App.SpeedsRoute = Ember.Route.extend({
+
+  setupController:function (controller, model) {
+    this._super();
+    controller.set('model', model);
+    controller.set('routeId', this.modelFor('route').id);
+    controller.set('date', this.modelFor('day').date);
+  },
+
+  model: function (params) {
     var id = this.modelFor('route').id,
-        date = params.day_id,
+        date = this.modelFor('day').date,
         url = '/api/v1/route/' + id + '/day/' + date;
 
     // TODO JEL: lol, this is already stored in the days route :(
@@ -76,6 +93,6 @@ App.DayRoute = Ember.Route.extend({
         })
       });
     });
-
   }
 });
+

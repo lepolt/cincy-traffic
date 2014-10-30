@@ -37,4 +37,32 @@ router.get('/route/:id/day/:date', function (req, res) {
     }
   });
 });
+
+router.get('/route/:id/day/:date/download', function (req, res) {
+  var db = require('../../../db/db'),
+      //id = req.body.id,
+      id = req.params.id,
+      //date = req.body.date;
+      date = req.params.date;
+
+  db.getDayForRoute(id, date, function (err, results) {
+    var csv = require('to-csv');
+    var filename = date + '.csv',
+        text;
+
+    if (!err) {
+      text = csv(results);
+
+      res.set({
+        'Content-Disposition': 'attachment; filename="' + filename + '"',
+        'Content-Type': 'text/csv',
+        'Content-Length': text.length
+      });
+      res.send(text);
+    } else {
+      //debugger;
+    }
+  });
+});
+
 module.exports = router;

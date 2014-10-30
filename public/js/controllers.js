@@ -1,14 +1,5 @@
 
 App.RoutesController = Ember.Controller.extend({
-//App.IndexController = Ember.Controller.extend({
-  minutes: null,
-  selectedRoute: {},
-  selectedRouteDisplayName: function() {
-    var selectedRoute = this.get('selectedRoute');
-
-    return selectedRoute.crossroadName + '  (' + selectedRoute.direction + ')';
-  }.property('selectedRoute'),
-
   trafficRoutes: function () {
     return this.get('model').map(function (item) {
       return Ember.Object.create({
@@ -18,7 +9,7 @@ App.RoutesController = Ember.Controller.extend({
         routeName: item.routeName
       });
     });
-  }.property()
+  }.property('model')
 
 });
 
@@ -39,4 +30,18 @@ App.DaysController = Ember.Controller.extend({
     return days.uniq().sort();
 
   }.property('model')
+
+});
+
+App.SpeedsController = Ember.Controller.extend({
+  routeId: null,
+  date: null,
+
+  url: function() {
+    var id = this.get('routeId'),
+        date = this.get('date'),
+        url = '/api/v1/route/' + id + '/day/' + date + '/download';
+
+    return url;
+  }.property('routeId', 'date')
 });

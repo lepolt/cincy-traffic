@@ -14,9 +14,26 @@
   </script>
 
   <script type="text/x-handlebars" data-template-name="routes">
-    {{view "select" content=trafficRoutes selection=selectedRoute optionValuePath="content.id" optionLabelPath="content.crossroadName" prompt="<Not Set>"}}
+    <table>
+      <tr>
+        <th>Crossroad Name</th>
+        <th>Route</th>
+        <th>Direction</th>
+      </tr>
 
-    <button {{action "submitClicked" selectedRoute}}>Get Data</button>
+    {{#each item in trafficRoutes}}
+      <tr>
+        <td>
+          {{#link-to "days" item.id}}
+            {{item.crossroadName}}
+          {{/link-to}}
+        </td>
+        <td>{{item.routeName}}</td>
+        <td>{{item.direction}}</td>
+      </tr>
+
+    {{/each}}
+    </table>
 
   </script>
 
@@ -24,12 +41,12 @@
     Record count: {{numRecords}}
     <ul>
       {{#each item in uniqueDays}}
-        <li>{{#link-to "day" item}}{{item}}{{/link-to}}</li>
+        <li>{{#link-to "speeds" item}}{{item}}{{/link-to}}</li>
       {{/each}}
     </ul>
   </script>
 
-  <script type="text/x-handlebars" data-template-name="day">
+  <script type="text/x-handlebars" data-template-name="speeds">
   <table>
     <tr>
       <th>Time</th>
@@ -42,6 +59,9 @@
     </tr>
     {{/each}}
   </table>
+
+  <a href="{{unbound url}}">Download</a>
+
   </script>
 
   <script src="bower_components/jquery/dist/jquery.js"></script>
