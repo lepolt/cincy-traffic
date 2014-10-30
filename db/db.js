@@ -212,7 +212,9 @@ exports.insertTrafficData = function (alerts, callback) {
 };
 
 exports.getRouteNames = function (callback) {
-  var query = 'SELECT DISTINCT crossroadName, description, directionText FROM trafficSpeedData';
+  var query = 'SELECT DISTINCT crossroadName, description, directionText, id, routeName ' +
+              'FROM trafficSpeedData ' +
+              'ORDER BY id';
 
   db.all(query, function (err, results) {
     callback(results);
@@ -220,19 +222,31 @@ exports.getRouteNames = function (callback) {
 
 };
 
-exports.getRouteTrend = function (crossroadName, directionText, minutes, callback) {
+exports.getRouteData = function (routeId, callback) {
   var query = 'SELECT crossroadName, roadStatus, averageSpeed, date ' +
               'FROM trafficSpeedData ' +
-              'WHERE crossroadName=$crossroadName AND directionText=$directionText ' +
-              'ORDER BY date ASC ' +
-              'LIMIT $minutes';
+              'WHERE id=$routeId ' +
+              'ORDER BY date ASC';
 
   db.all(query, {
-    $crossroadName: crossroadName,
-    $directionText: directionText,
-    $minutes: minutes
+    $routeId: routeId
   }, function (err, results) {
     callback(err, results);
   });
 
+};
+
+exports.getDayForRoute = function (id, date, callback) {
+  var query = 'SELECT averageSpeed, date ' +
+          'FROM trafficSpeedData ' +
+          'WHERE id=$routeId AND ' +
+          'date LIKE $likeDate ' +
+          'ORDER BY date ASC';
+
+  db.all(query, {
+    $routeId: id,
+    $likeDate: date + '%'
+  }, function (err, results) {
+    callback(err, results);
+  })
 };

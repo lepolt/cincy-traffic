@@ -14,6 +14,8 @@ router.get('/', function(req, res) {
 
 });
 
+/* GET home page. */
+
 router.get('/routes/trend', function (req, res) {
   var crossroadName = req.query.crossroadName,
       directionText = req.query.directionText,

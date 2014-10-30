@@ -1,0 +1,12 @@
+{
+  "name": "reminders",
+  "version": "1.0.0",
+  "private": false,
+  "dependencies": {
+    "handlebars": "~1.3.0",
+    "ember": "1.8.0",
+    "ember-data": "1.0.0-beta.11",
+    "jquery": "~2.1.0",
+    "moment": "~2.8.3"
+  }
+}
