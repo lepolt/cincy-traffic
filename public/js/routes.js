@@ -6,6 +6,7 @@ App.Router.map(function() {
   //});
   this.route('routes', { path: '/' });
   //this.resource('/', { path: '/routes' });
+  this.resource('stats');
   this.resource('routes', { path: '/routes' });
   this.resource('route', { path: '/route/:route_id' }, function() {
     this.resource('days', { path: '/days' });
@@ -96,3 +97,12 @@ App.SpeedsRoute = Ember.Route.extend({
   }
 });
 
+App.StatsRoute = Ember.Route.extend({
+  model: function (params) {
+    var url = '/api/v1/stats';
+
+    return Ember.$.getJSON(url).then(function (data) {
+      return Ember.Object.create(data);
+    });
+  }
+});

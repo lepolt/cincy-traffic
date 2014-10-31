@@ -1,6 +1,14 @@
 var express = require('express');
 var router = express.Router();
 
+router.get('/stats', function (req, res) {
+  var db = require('../../../db/db');
+
+  db.getStats(function (err, results) {
+    res.json(results);
+  });
+});
+
 router.get('/routeNames', function(req, res) {
   var db = require('../../../db/db');
 

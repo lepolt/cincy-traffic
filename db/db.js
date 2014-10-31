@@ -170,6 +170,25 @@ exports.close = function () {
   console.log('Closed database.');
 };
 
+exports.getStats = function (callback) {
+  var query = 'SELECT count(*) FROM trafficSpeedData',
+      records,
+      routes;
+
+  db.get(query, function (err, results) {
+    records = results['count(*)'];
+    query = 'SELECT count(DISTINCT id) FROM trafficSpeedData';
+    db.get(query, function (err, results) {
+      routes = results['count(DISTINCT id)'];
+
+      callback(null, {
+        numRecords: records,
+        numRoutes: routes
+      });
+    })
+  });
+};
+
 exports.insertTrafficData = function (alerts, callback) {
   var date = new Date().toISOString(),
       queryParams = [],
