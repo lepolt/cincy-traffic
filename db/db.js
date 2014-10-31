@@ -238,10 +238,10 @@ exports.getRouteData = function (routeId, callback) {
 
 exports.getDayForRoute = function (id, date, callback) {
   var query = 'SELECT averageSpeed, date ' +
-          'FROM trafficSpeedData ' +
-          'WHERE id=$routeId AND ' +
-          'date LIKE $likeDate ' +
-          'ORDER BY date ASC';
+              'FROM trafficSpeedData ' +
+              'WHERE id=$routeId AND ' +
+              'date LIKE $likeDate ' +
+              'ORDER BY date ASC';
 
   db.all(query, {
     $routeId: id,

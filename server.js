@@ -98,7 +98,7 @@ function getTrafficData () {
           try {
             // I only care about I-75 traffic
             alerts = body.d['TrafficSpeedAlerts'].filter(function (item) {
-              return item['RouteName'] === 'I-75';
+              return (item['RouteName'] === 'I-75');
             });
 
             // This will get the signs (I think)

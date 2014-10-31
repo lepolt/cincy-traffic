@@ -37,6 +37,51 @@ App.SpeedsController = Ember.Controller.extend({
   routeId: null,
   date: null,
 
+  morning: function () {
+    return this.get('model').filter(function (item) {
+
+      var time = moment(item.time, 'h:mm:ss A');
+
+      if (time.isBefore(9, 'hour')) {
+        return item;
+      }
+    });
+  }.property('model'),
+
+  afternoon: function () {
+    return this.get('model').filter(function (item) {
+      var time = moment(item.time, 'h:mm:ss A');
+
+      if (time.isAfter(14, 'hour')) {
+        return item;
+      }
+    });
+  }.property('model'),
+
+  getTimes: function (morning) {
+    if (morning) {
+      return this.get('morning').map(function (item) {
+        return item.time;
+      });
+    } else {
+      return this.get('afternoon').map(function (item) {
+        return item.time;
+      });
+    }
+  },
+
+  getSpeeds: function (morning) {
+    if (morning) {
+      return this.get('morning').map(function (item) {
+        return item.averageSpeed;
+      });
+    } else {
+      return this.get('afternoon').map(function (item) {
+        return item.averageSpeed;
+      });
+    }
+  },
+
   url: function() {
     var id = this.get('routeId'),
         date = this.get('date'),
