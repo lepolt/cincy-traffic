@@ -90,7 +90,7 @@ App.SpeedsRoute = Ember.Route.extend({
       return results.map(function (item) {
         return Ember.Object.create({
           averageSpeed: item.averageSpeed,
-          time: new Date(item.date).toLocaleTimeString()
+          time: moment(item.date).seconds(0)
         })
       });
     });

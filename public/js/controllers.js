@@ -36,50 +36,143 @@ App.DaysController = Ember.Controller.extend({
 App.SpeedsController = Ember.Controller.extend({
   routeId: null,
   date: null,
+  morningStart: 6,
+  morningEnd: 9,
+  morningMinutes: function() {
+    return (this.get('morningEnd') - this.get('morningStart')) * 60;
+  }.property('morningStart', 'morningEnd'),
+  
+  afternoonStart: 14,
+  afternoonEnd: 18,
+  afternoonMinutes: function() {
+    return (this.get('afternoonEnd') - this.get('afternoonStart')) * 60;
+  }.property('afternoonStart', 'afternoonEnd'),
 
+  allMorning: function () {
+    var i,
+        time = moment().hour(this.get('morningStart')).minute(0).second(0),
+        timeSpeedList = this.get('morning'),
+        format = 'HH:mm A',
+        allTimeSpeedList = [];
+
+    if (timeSpeedList.length) {
+      for (i = 0; i < this.get('morningMinutes'); i++) {
+        allTimeSpeedList.push({
+          time: moment(time),
+          averageSpeed: 50
+        });
+        time.add(1, 'minute');
+      }
+
+      // Find and replace times in the allTimeSpeedList
+      _.each(timeSpeedList, function (item, index) {
+        var foundIndex,
+            foundIt;
+
+        foundIt = _.find(allTimeSpeedList, function (allItem, index) {
+          foundIndex = index;
+          return (allItem.time.format(format) === item.time.format(format));
+        });
+
+        if (foundIt) {
+          allTimeSpeedList[foundIndex] = item;
+        }
+      });
+    }
+
+    return allTimeSpeedList;
+  }.property('morningStart', 'morningMinutes', 'morning'),
+
+  allAfternoon: function () {
+    var i,
+        time = moment().hour(this.get('afternoonStart')).minute(0).second(0),
+        timeSpeedList = this.get('afternoon'),
+        format = 'HH:mm A',
+        allTimeSpeedList = [];
+
+    if (timeSpeedList.length) {
+      for (i = 0; i < this.get('afternoonMinutes'); i++) {
+        allTimeSpeedList.push({
+          time: moment(time),
+          averageSpeed: 50
+        });
+        time.add(1, 'minute');
+      }
+
+      // Find and replace times in the allTimeSpeedList
+      _.each(timeSpeedList, function (item, index) {
+        var foundIndex,
+            foundIt;
+
+        foundIt = _.find(allTimeSpeedList, function (allItem, index) {
+          foundIndex = index;
+          return (allItem.time.format(format) === item.time.format(format));
+        });
+
+        if (foundIt) {
+          allTimeSpeedList[foundIndex] = item;
+        }
+      });
+    }
+
+    return allTimeSpeedList;
+  }.property('afternoonStart', 'afternoonMinutes', 'afternoon'),
+  
   morning: function () {
     return this.get('model').filter(function (item) {
+      var morningStart = this.get('morningStart'),
+          morningEnd = this.get('morningEnd'),
+          time = moment(item.time, 'h:mm:ss A'),
+          hour;
 
-      var time = moment(item.time, 'h:mm:ss A');
-
-      if (time.isBefore(9, 'hour')) {
-        return item;
+      if (moment.isMoment(time)) {
+        hour = time.hour();
+        
+        // Between morningStart and morningEnd  
+        if (hour >= morningStart && hour < morningEnd) {
+          return item;
+        }
       }
-    });
-  }.property('model'),
+    }.bind(this));
+  }.property('model', 'morningStart', 'morningEnd'),
 
   afternoon: function () {
     return this.get('model').filter(function (item) {
-      var time = moment(item.time, 'h:mm:ss A');
+      var afternoonStart = this.get('afternoonStart'),
+          afternoonEnd = this.get('afternoonEnd'),
+          time = moment(item.time, 'h:mm:ss A'),
+          hour;
 
-      if (time.isAfter(14, 'hour')) {
-        return item;
+      if (moment.isMoment(time)) {
+        hour = time.hour();
+
+        // Between afternoonStart and afternoonEnd  
+        if (hour >= afternoonStart && hour < afternoonEnd) {
+          return item;
+        }
       }
-    });
-  }.property('model'),
+    }.bind(this));
+  }.property('model', 'afternoonStart', 'afternoonEnd'),
 
   getTimes: function (morning) {
-    if (morning) {
-      return this.get('morning').map(function (item) {
-        return item.time;
-      });
-    } else {
-      return this.get('afternoon').map(function (item) {
-        return item.time;
-      });
-    }
+    var times,
+        timeSpeedList,
+        allTimeSpeedList = morning ? this.get('allMorning') : this.get('allAfternoon'),
+        format = 'HH:mm A';
+
+    return _.map(allTimeSpeedList, function (item) {
+      return item.time.format(format);
+    });
   },
 
   getSpeeds: function (morning) {
-    if (morning) {
-      return this.get('morning').map(function (item) {
-        return item.averageSpeed;
-      });
-    } else {
-      return this.get('afternoon').map(function (item) {
-        return item.averageSpeed;
-      });
-    }
+    var speeds,
+        timeSpeedList,
+        allTimeSpeedList = morning ? this.get('allMorning') : this.get('allAfternoon');
+
+    return _.map(allTimeSpeedList, function (item) {
+      return item.averageSpeed;
+    });
   },
 
   url: function() {

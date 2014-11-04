@@ -3,7 +3,7 @@ App.SpeedsView = Ember.View.extend({
   templateName: 'speeds',
 
   buildChart: function (morning) {
-    var $chart = $('#pmChart'),
+    var $chart = morning ? $('#amChart') : $('#pmChart'),
         times = this.get('controller').getTimes(morning),
         speeds = this.get('controller').getSpeeds(morning),
         ctx;
@@ -27,7 +27,11 @@ App.SpeedsView = Ember.View.extend({
         ]
       };
 
-      var myLineChart = new Chart(ctx).Line(data);
+      var myLineChart = new Chart(ctx).Line(data, {
+        bezierCurve: false
+      });
+    } else {
+      $chart.remove();
     }
   },
 
