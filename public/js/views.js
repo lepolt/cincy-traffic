@@ -6,13 +6,22 @@ App.SpeedsView = Ember.View.extend({
     var $chart = morning ? $('#amChart') : $('#pmChart'),
         times = this.get('controller').getTimes(morning),
         speeds = this.get('controller').getSpeeds(morning),
+        modLabel,
+        data,
         ctx;
 
     if (times.length && $chart.get(0)) {
       ctx = $chart.get(0).getContext('2d');
+      modLabel = Math.ceil(times.length/90);
 
-      var data = {
-        labels: times,
+      data = {
+        labels: _.map(times, function (item, index) {
+          var strRet = '';
+          if (index % modLabel === 0) {
+            strRet = item;
+          }
+          return strRet;
+        }),
         datasets: [
           {
             label: 'My First dataset',

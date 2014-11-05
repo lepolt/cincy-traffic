@@ -18,13 +18,10 @@ App.DaysController = Ember.Controller.extend({
 
   uniqueDays: function() {
     var model = this.get('model'),
-        days = model.map(function (item) {
-      var date = new Date(item.date),
-          year = date.getFullYear(),
-          month = date.getMonth() + 1,
-          day = date.getDate();
+        days;
 
-      return (year + '-' + month + '-' + day);
+    days = model.map(function (item) {
+      return moment(item.date).format('YYYY-MM-DD');
     });
 
     return days.uniq().sort();
@@ -181,5 +178,11 @@ App.SpeedsController = Ember.Controller.extend({
         url = '/api/v1/route/' + id + '/day/' + date + '/download';
 
     return url;
-  }.property('routeId', 'date')
+  }.property('routeId', 'date'),
+
+  actions: {
+    trendClicked: function (days) {
+      debugger;
+    }
+  }
 });

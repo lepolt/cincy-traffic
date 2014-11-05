@@ -55,20 +55,14 @@
     <canvas id="amChart" width="1200" height="600"></canvas>
     <canvas id="pmChart" width="1200" height="600"></canvas>
 
-  <table>
-    <tr>
-      <th>Time</th>
-      <th>Avg Speed</th>
-    </tr>
-    {{#each item in model}}
-    <tr>
-      <td>{{item.time}}</td>
-      <td>{{item.averageSpeed}}</td>
-    </tr>
-    {{/each}}
-  </table>
+    <br />
+    {{!--<a href="{{unbound url}}">Download Results</a>--}}
 
-  <a href="{{unbound url}}">Download</a>
+    <br />
+    <br />
+
+    {{!--Days: {{input value=days}}--}}
+    {{!--<button {{action "trendClicked" days}}>Find Trend</button>--}}
 
   </script>
 

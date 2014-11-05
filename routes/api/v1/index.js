@@ -48,9 +48,7 @@ router.get('/route/:id/day/:date', function (req, res) {
 
 router.get('/route/:id/day/:date/download', function (req, res) {
   var db = require('../../../db/db'),
-      //id = req.body.id,
       id = req.params.id,
-      //date = req.body.date;
       date = req.params.date;
 
   db.getDayForRoute(id, date, function (err, results) {
@@ -58,7 +56,7 @@ router.get('/route/:id/day/:date/download', function (req, res) {
     var filename = date + '.csv',
         text;
 
-    if (!err) {
+    if (!err && results) {
       text = csv(results);
 
       res.set({
