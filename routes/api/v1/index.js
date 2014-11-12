@@ -46,14 +46,28 @@ router.get('/route/:id/day/:date', function (req, res) {
   });
 });
 
+router.get('/route/:id/days/:days', function (req, res) {
+  var db = require('../../../db/db'),
+      id = req.params.id,
+      dates = req.params.days.split(',');
+
+  db.getDaysForRoute(id, dates, function (err, results) {
+    if (!err) {
+      res.json(results);
+    } else {
+      //debugger;
+    }
+  });
+});
+
 router.get('/route/:id/day/:date/download', function (req, res) {
   var db = require('../../../db/db'),
       id = req.params.id,
       date = req.params.date;
 
   db.getDayForRoute(id, date, function (err, results) {
-    var csv = require('to-csv');
-    var filename = date + '.csv',
+    var csv = require('to-csv'),
+        filename = date + '.csv',
         text;
 
     if (!err && results) {

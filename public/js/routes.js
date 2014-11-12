@@ -9,7 +9,9 @@ App.Router.map(function() {
   this.resource('stats');
   this.resource('routes', { path: '/routes' });
   this.resource('route', { path: '/route/:route_id' }, function() {
-    this.resource('days', { path: '/days' });
+    this.resource('days', { path: '/days' }, function () {
+      //this.resource('trend', { path: '/:days/trend' });
+    });
     this.resource('day', { path: '/day/:day_id' }, function () {
       this.resource('speeds');
     });
@@ -49,18 +51,34 @@ App.DaysRoute = Ember.Route.extend({
 
   setupController: function (controller, model) {
     controller.set('model', model);
+    controller.set('routeId', this.modelFor('route').id);
     this._super();
   },
 
   model: function (data) {
     var url = '/api/v1/route/' + this.modelFor('route').id,
-        self = this;
+        days;
 
     return Ember.$.getJSON(url).then(function (results) {
       App.Traffic[data.name] = results;
-      return results;
+
+      days = results.map(function (item) {
+        return moment(item.date).format('YYYY-MM-DD');
+      });
+      return days.uniq().sort().map(function (item) {
+        return Ember.Object.create({ name: item, isSelected: false });
+      });
     });
   }
+
+  //,
+  //
+  //actions: {
+  //  trendClicked: function () {
+  //    var days = this.controllerFor('days').get('selection');
+  //    this.transitionTo('trend', days.join(','));
+  //  }
+  //}
 });
 
 App.DayRoute = Ember.Route.extend({
@@ -96,6 +114,30 @@ App.SpeedsRoute = Ember.Route.extend({
     });
   }
 });
+
+//App.TrendRoute = Ember.Route.extend({
+//
+//  setupController:function (controller, model) {
+//    this._super();
+//    controller.set('model', model);
+//    controller.set('days', this.controllerFor('days').get('selection'));
+//  },
+//
+//  model: function (params) {
+//    var days = params.days.split(','),
+//        id = this.modelFor('route').id,
+//        url = '/api/v1/route/' + id + '/days/' + params.days;
+//
+//    return Ember.$.getJSON(url).then(function (results) {
+//      return results.map(function (item) {
+//        return Ember.Object.create({
+//          averageSpeed: item.averageSpeed,
+//          time: moment(item.date).seconds(0)
+//        })
+//      });
+//    });
+//  }
+//});
 
 App.StatsRoute = Ember.Route.extend({
   model: function (params) {

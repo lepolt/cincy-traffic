@@ -42,12 +42,22 @@
   </script>
 
   <script type="text/x-handlebars" data-template-name="days">
-    Record count: {{numRecords}}
-    <ul>
-      {{#each item in uniqueDays}}
-        <li>{{#link-to "speeds" item}}{{item}}{{/link-to}}</li>
-      {{/each}}
-    </ul>
+    {{#each item in model itemController="selectionHelper"}}
+      <div>{{input type="checkbox" name=item.name checked=item.isSelected}}&nbsp;&nbsp;&nbsp;{{#link-to "speeds" item.name}}{{item.name}}{{/link-to}}</div>
+    {{/each}}
+
+    Start Time: {{input valueBinding="startTime"}}
+    End Time: {{input valueBinding="endTime"}}
+
+    {{outlet}}
+    <canvas id="trend-chart" width="1200" height="600"></canvas>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="trend">
+    <canvas id="trend-chart" width="1200" height="600"></canvas>
+    {{#each item in days}}
+      {{item}}
+    {{/each}}
   </script>
 
   <script type="text/x-handlebars" data-template-name="speeds">
@@ -56,18 +66,14 @@
     <canvas id="pmChart" width="1200" height="600"></canvas>
 
     <br />
-    {{!--<a href="{{unbound url}}">Download Results</a>--}}
+    <a href="{{unbound url}}">Download Results</a>
 
     <br />
     <br />
-
-    {{!--Days: {{input value=days}}--}}
-    {{!--<button {{action "trendClicked" days}}>Find Trend</button>--}}
 
   </script>
 
   <script src="bower_components/jquery/dist/jquery.js"></script>
-  <script src="bower_components/moment/moment.js"></script>
   <script src="bower_components/handlebars/handlebars.js"></script>
   <script src="bower_components/ember/ember.js"></script>
   <script src="bower_components/ember-data/ember-data.js"></script>

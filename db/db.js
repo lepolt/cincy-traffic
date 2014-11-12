@@ -269,3 +269,30 @@ exports.getDayForRoute = function (id, date, callback) {
     callback(err, results);
   })
 };
+
+exports.getDaysForRoute = function (id, dates, callback) {
+  var queryParams = [],
+      query,
+      i;
+
+  query = 'SELECT averageSpeed, date ' +
+          'FROM trafficSpeedData ' +
+          'WHERE id=? AND (';
+
+  queryParams.push(id);
+
+  for (i = 0; i < dates.length; i++) {
+    query +='date LIKE ?';
+    queryParams.push(dates[i] + '%');
+
+    if (i + 1 < dates.length) {
+      query += ' OR ';
+    }
+  }
+
+  query += ') ORDER BY date ASC';
+
+  db.all(query, queryParams, function (err, rows) {
+    callback(err, rows);
+  });
+};
