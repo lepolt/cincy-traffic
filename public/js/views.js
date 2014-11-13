@@ -2,8 +2,30 @@
 App.DaysView = Ember.View.extend({
   chart: null,
 
+  didInsertElement: function () {
+    this._super();
+
+    var self = this,
+        slider = $('#time-slider');
+
+    if (slider) {
+      slider.slider({
+        range: true,
+        min: 5,
+        max: 15,
+        values: [ 6, 9 ],
+        step: .25,
+
+        slide: function(event, ui) {
+          self.set('controller.startValue', ui.values[0]);
+          self.set('controller.endValue', ui.values[1]);
+        }
+      });
+    }
+
+  },
+
   _speedDataDidChange: function() {
-    console.log('_speedDataDidChange');
     this.buildChart();
   }.observes('controller.speedData'),
 
@@ -34,7 +56,7 @@ App.DaysView = Ember.View.extend({
   },
 
   buildChart: function () {
-console.log('speeding chart');
+console.log('buildChart view');
     var $chart = $('#trend-chart'),
         speedData = this.get('controller.speedData'),
         times = this.get('controller.times'),
@@ -67,43 +89,20 @@ console.log('speeding chart');
       };
 
       if (chart) {
-        //debugger;
         chart.clear();
-        //chart.datasets = datasets;
-        //chart.update();
       }
-      //else {
-      //
-      //  chart = new Chart(ctx).Line(data, {
-      //    bezierCurve: false,
-      //    responsive: true
-      //  });
-      //}
+
       chart = new Chart(ctx).Line(data, {
         bezierCurve: false,
         responsive: true
       });
-chart.update();
+
+      chart.update();
+
       this.set('chart', chart);
     } else {
       //$chart.remove();
     }
-  }
-
-});
-
-App.TrendView = Ember.View.extend({
-  templateName: 'trend',
-
-  didInsertElement: function() {
-    this._super();
-  debugger;
-    var model = this.get('model'),
-        controller = this.get('controller');
-  },
-
-  buildChart: function () {
-
   }
 
 });

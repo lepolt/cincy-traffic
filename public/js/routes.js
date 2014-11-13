@@ -71,14 +71,6 @@ App.DaysRoute = Ember.Route.extend({
     });
   }
 
-  //,
-  //
-  //actions: {
-  //  trendClicked: function () {
-  //    var days = this.controllerFor('days').get('selection');
-  //    this.transitionTo('trend', days.join(','));
-  //  }
-  //}
 });
 
 App.DayRoute = Ember.Route.extend({
@@ -114,30 +106,6 @@ App.SpeedsRoute = Ember.Route.extend({
     });
   }
 });
-
-//App.TrendRoute = Ember.Route.extend({
-//
-//  setupController:function (controller, model) {
-//    this._super();
-//    controller.set('model', model);
-//    controller.set('days', this.controllerFor('days').get('selection'));
-//  },
-//
-//  model: function (params) {
-//    var days = params.days.split(','),
-//        id = this.modelFor('route').id,
-//        url = '/api/v1/route/' + id + '/days/' + params.days;
-//
-//    return Ember.$.getJSON(url).then(function (results) {
-//      return results.map(function (item) {
-//        return Ember.Object.create({
-//          averageSpeed: item.averageSpeed,
-//          time: moment(item.date).seconds(0)
-//        })
-//      });
-//    });
-//  }
-//});
 
 App.StatsRoute = Ember.Route.extend({
   model: function (params) {

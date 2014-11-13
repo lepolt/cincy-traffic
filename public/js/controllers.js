@@ -14,23 +14,85 @@ App.RoutesController = Ember.Controller.extend({
 });
 
 App.DaysController = Ember.Controller.extend({
-  startTime: 6,
-  endTime: 9,
+  timeFormat: 'HH:mm A',
+  shortTimeFormat: 'h:mm A',
   speedData: {},
-speedDataDidChange: function() {
-console.log('controller speedDataDidChange: ' + this.get('speedData') );
-}.observes('speedData'),
+  startValue: 6,
+  endValue: 9,
+
+  startTime: function() {
+    var str = this.getTimeString(this.get('startValue')),
+        timeFormat = this.get('timeFormat');
+
+    return moment(str, timeFormat);
+  }.property('startValue'),
+
+  endTime: function() {
+    var str = this.getTimeString(this.get('endValue')),
+        timeFormat = this.get('timeFormat');
+
+    return moment(str, timeFormat);
+  }.property('endValue'),
+
+
+  startTimeStr: function() {
+    return (this.get('startTime').format(this.get('shortTimeFormat')));
+  }.property('startTime', 'timeFormat'),
+
+  endTimeStr: function() {
+    return (this.get('endTime').format(this.get('shortTimeFormat')));
+  }.property('endTime', 'timeFormat'),
+
   minutes: function() {
-    return (this.get('endTime') - this.get('startTime')) * 60;
+    var startTime = this.get('startTime'),
+        endTime = this.get('endTime');
+
+    return endTime.diff(startTime, 'minutes');
   }.property('startTime', 'endTime'),
+
+  getTimeString: function (timeVal) {
+    if (!timeVal) {
+      return '';
+    }
+
+    var timeSections = timeVal.toString().split('.'),
+        hours = timeSections[0],
+        amPm = hours < 12 ? 'AM' : 'PM',
+        minutes = '00',
+        timeStr;
+
+    if (timeSections.length === 2) {
+      minutes = timeSections[1];
+      switch (minutes) {
+        case '25':
+          minutes = '15';
+          break;
+        case '5':
+          minutes = '30';
+          break;
+        case '75':
+          minutes = '45';
+          break;
+        default:
+          minutes = '00';
+      }
+    }
+
+    return hours + ':' + minutes + ' ' + amPm;
+  },
 
   // If start or end times change we need to update all our data
   _startEndTimeDidChange: function() {
-    //Ember.run.debounce(this)
+    console.log('_startEndTimeDidChange');
+    Ember.run.debounce(this, this.resetAndGetData, 1000);
+  }.observes('startValue', 'endValue'),
+
+  resetAndGetData: function () {
+console.log('resetAndGetData');
     // Kill cache and re-fetch
     this.set('speedData', {});
-    this.getData(this.get('selection'));
-  }.observes('startTime', 'endTime'),
+    this.getData();
+  },
 
   _initSelection: function () {
     this.set('selection', []);
@@ -49,22 +111,25 @@ console.log('controller speedDataDidChange: ' + this.get('speedData') );
     var times,
         speedData = this.get('speedData'),
         timeSpeedList = speedData[this.get('selection')[0]],
-        format = 'HH:mm A';
+        format = this.get('timeFormat');
 
     return _.map(timeSpeedList, function (item) {
       return item.time.format(format);
     });
   }.property('speedData', 'selection'),
 
-  getData: function (days) {
+  getData: function () {
+console.log('getData');
     var id = this.get('routeId'),
         url = '/api/v1/route/' + id + '/days/',
         daysToFetch = [],
         speedData = this.get('speedData'),
         speedsPerDay = {},
-        time = moment().hour(this.get('startTime')).minute(0).second(0),
+        startTime = this.get('startTime'),
+        time = moment().hour(startTime.hour()).minute(startTime.minute()).second(0),
         allTimeSpeedList = [],
         minutes = this.get('minutes'),
+        days = this.get('selection'),
         i;
 
     if (minutes <= 0 || days.length <= 0) {
@@ -84,14 +149,14 @@ console.log('controller speedDataDidChange: ' + this.get('speedData') );
     daysToFetch = _.filter(days, function (thisDay) {
       return (!speedData.hasOwnProperty(thisDay))
     });
-debugger;
+
     // Append days to fetch to our URL
     url += daysToFetch;
 
     // Make the request
     Ember.$.getJSON(url).then(function (results) {
       var timeSpeedList,
-          format = 'HH:mm A',
+          format = this.get('timeFormat'),
           dateFormat = 'YYYY-MM-DD';
 
       // First reformat our data
@@ -132,7 +197,7 @@ debugger;
           // Update our object
           speedData[day] = allTimesAndSpeedsForToday;
         }
-debugger;
+
       }.bind(this));
 
       // Update our property
@@ -167,19 +232,7 @@ App.SelectionHelperController = Ember.ObjectController.extend({
   }.property('parentController.selection')
 });
 
-//App.TrendController = Ember.Controller.extend({
-//  days: null,
-//  daysDidChange: function() {
-//  console.log('daysDidChange: ' + this.get('days'));
-//  }.observes('days')
-//  //uniqueDays: function() {
-//  //  var model = this.get('model');
-//  //}.property('model')
-//});
-
 App.SpeedsController = Ember.Controller.extend({
-  needs: ['day'],
-
   routeId: null,
   date: null,
   morningStart: 6,
@@ -198,7 +251,7 @@ App.SpeedsController = Ember.Controller.extend({
     var i,
         time = moment().hour(this.get('morningStart')).minute(0).second(0),
         timeSpeedList = this.get('morning'),
-        format = 'HH:mm A',
+        format = this.get('timeFormat'),
         allTimeSpeedList = [];
 
     if (timeSpeedList.length) {
@@ -233,7 +286,7 @@ App.SpeedsController = Ember.Controller.extend({
     var i,
         time = moment().hour(this.get('afternoonStart')).minute(0).second(0),
         timeSpeedList = this.get('afternoon'),
-        format = 'HH:mm A',
+        format = this.get('timeFormat'),
         allTimeSpeedList = [];
 
     if (timeSpeedList.length) {
@@ -304,7 +357,7 @@ App.SpeedsController = Ember.Controller.extend({
     var times,
         timeSpeedList,
         allTimeSpeedList = morning ? this.get('allMorning') : this.get('allAfternoon'),
-        format = 'HH:mm A';
+        format = this.get('timeFormat');
 
     return _.map(allTimeSpeedList, function (item) {
       return item.time.format(format);
@@ -327,34 +380,5 @@ App.SpeedsController = Ember.Controller.extend({
         url = '/api/v1/route/' + id + '/day/' + date + '/download';
 
     return url;
-  }.property('routeId', 'date'),
-
-  actions: {
-    //trendClicked: function (days) {
-    //  var numDays = parseInt(days, 10),
-    //      date = moment(this.get('date'), 'YYYY-MM-DD'),
-    //      daysList = [date.format('YYYY-MM-DD')],
-    //      i;
-    //
-    //  if (isNaN(numDays)) {
-    //    numDays = 5;
-    //  }
-    //
-    //  //moment().weekday(0); // Sunday
-    //  //moment().weekday(7); // Saturday
-    //  for (i = 0; i < numDays; i++) {
-    //    date.subtract(1, 'day');
-    //
-    //    // While not Saturday or Sunday
-    //    while (date.weekday() === 7 || date.weekday() === 0) {
-    //      date.subtract(1, 'day');
-    //    }
-    //    daysList.push(date.format('YYYY-MM-DD'));
-    //  }
-    //
-    //  // daysList contains the dates we want to use for our trend
-    //  this.get('controllers.day').send('trendClicked', daysList);
-    //}
-
-  }
+  }.property('routeId', 'date')
 });
